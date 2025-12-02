@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Element Reminder Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 350px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+            font-size: 0.9em;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box; 
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .btn-generate {
+            background-color: #007bff;
+            color: white;
+            margin-top: 20px;
+        }
+        .btn-generate:hover {
+            background-color: #0056b3;
+        }
+        .btn-copy {
+            background-color: #28a745;
+            color: white;
+            display: none; /* Hidden until code is generated */
+        }
+        .btn-copy:hover {
+            background-color: #1e7e34;
+        }
+        textarea {
+            width: 100%;
+            height: 60px;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #eee;
+            font-family: monospace;
+            resize: none;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Remind Helper</h2>
+
+    <div class="form-group">
+        <label for="reminderDate">Date</label>
+        <input type="date" id="reminderDate">
+    </div>
+
+    <div class="form-group">
+        <label for="reminderTime">Time</label>
+        <input type="time" id="reminderTime">
+    </div>
+
+    <div class="form-group">
+        <label for="reminderContent">Message</label>
+        <input type="text" id="reminderContent" placeholder="E.g., meeting with team">
+    </div>
+
+    <button class="btn-generate" onclick="generateCode()">Generate Command</button>
+    
+    <textarea id="outputBox" readonly placeholder="!remind 2025-12-02 19:20 content"></textarea>
+    
+    <button class="btn-copy" id="copyBtn" onclick="copyText()">Copy Code</button>
+</div>
+
+<script>
+    function generateCode() {
+        // 1. Get values from inputs
+        const content = document.getElementById('reminderContent').value;
+        const date = document.getElementById('reminderDate').value;
+        const time = document.getElementById('reminderTime').value;
+        
+        // 2. Simple validation
+        if(!content || !date || !time) {
+            alert("Please fill in Date, Time, and Message.");
+            return;
+        }
+
+        // 3. New Format: !remind [YYYY-MM-DD] [HH:mm] [Content]
+        const command = `!remind ${date} ${time} ${content}`;
+
+        // 4. Output the result
+        const outputBox = document.getElementById('outputBox');
+        outputBox.value = command;
+
+        // 5. Show the copy button
+        document.getElementById('copyBtn').style.display = "block";
+    }
+
+    function copyText() {
+        const copyText = document.getElementById("outputBox");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // For mobile devices
+
+        navigator.clipboard.writeText(copyText.value).then(() => {
+            const btn = document.getElementById("copyBtn");
+            const originalText = btn.innerText;
+            btn.innerText = "Copied!";
+            setTimeout(() => {
+                btn.innerText = originalText;
+            }, 2000);
+        });
+    }
+    
+    // Optional: Set default date to today
+    document.getElementById('reminderDate').valueAsDate = new Date();
+</script>
+
+</body>
+</html>
