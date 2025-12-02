@@ -2,158 +2,342 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Element Reminder Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <title>Element Reminder</title>
     <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --input-bg: #f8f9fa;
+            --input-border: #e1e4e8;
+            --primary: #007bff;
+            --btn-text: #ffffff;
+            --history-bg: #eeeeee;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --card-bg: #1e1e1e;
+                --text-color: #e0e0e0;
+                --input-bg: #2d2d2d;
+                --input-border: #444444;
+                --primary: #4a90e2;
+                --history-bg: #333333;
+            }
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            overscroll-behavior-y: none; 
         }
+
         .card {
-            background: white;
+            background: var(--card-bg);
             padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 350px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            width: 100%;
+            max-width: 400px;
         }
+
         h2 {
             text-align: center;
-            color: #333;
-            margin-top: 0;
-            margin-bottom: 20px;
+            margin: 0 0 20px 0;
+            font-size: 1.4rem;
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
+
+        .form-group { margin-bottom: 15px; }
+
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-            font-size: 0.9em;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.85em;
+            opacity: 0.7;
+            text-transform: uppercase;
         }
+
         input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box; 
+            padding: 14px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            box-sizing: border-box;
             font-size: 16px;
+            outline: none;
+            transition: all 0.2s;
         }
-        button {
-            width: 100%;
+
+        input:focus {
+            background-color: var(--card-bg);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+        }
+
+        /* UPDATED: 2x2 Grid for Frequent Times */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 columns */
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .pill-btn {
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-color);
             padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: 600;
             cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s;
         }
-        .btn-generate {
-            background-color: #007bff;
-            color: white;
-            margin-top: 20px;
+
+        .pill-btn:active { 
+            transform: scale(0.96); 
+            background-color: var(--input-border);
         }
-        .btn-generate:hover {
-            background-color: #0056b3;
+
+        /* Highlight specific time buttons subtly */
+        .pill-btn span {
+            pointer-events: none;
         }
-        .btn-copy {
-            background-color: #28a745;
-            color: white;
-            display: none; /* Hidden until code is generated */
-        }
-        .btn-copy:hover {
-            background-color: #1e7e34;
-        }
+
+        .result-area { position: relative; margin-top: 25px; }
+
         textarea {
             width: 100%;
-            height: 60px;
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            background-color: #eee;
-            font-family: monospace;
+            height: 70px;
+            padding: 15px;
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
             resize: none;
             box-sizing: border-box;
             font-size: 14px;
+        }
+
+        .btn-copy {
+            background-color: var(--primary);
+            color: var(--btn-text);
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        /* History Section */
+        .history-section {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 30px;
+        }
+        
+        .history-title {
+            font-size: 0.9em;
+            font-weight: bold;
+            opacity: 0.6;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.85em;
+            color: var(--text-color);
+            cursor: pointer;
+            border: 1px solid var(--input-border);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Remind Helper</h2>
+    <h2>Element Remind</h2>
 
-    <div class="form-group">
-        <label for="reminderDate">Date</label>
-        <input type="date" id="reminderDate">
+    <div class="quick-actions">
+        <button class="pill-btn" onclick="setTime(10, 0)">10:00 AM</button>
+        <button class="pill-btn" onclick="setTime(11, 0)">11:00 AM</button>
+        <button class="pill-btn" onclick="setTime(15, 30)">03:30 PM</button>
+        <button class="pill-btn" onclick="setTime(16, 0)">04:00 PM</button>
     </div>
 
     <div class="form-group">
-        <label for="reminderTime">Time</label>
-        <input type="time" id="reminderTime">
+        <label>When</label>
+        <div style="display: flex; gap: 10px;">
+            <input type="date" id="reminderDate" onchange="updatePreview()">
+            <input type="time" id="reminderTime" onchange="updatePreview()">
+        </div>
     </div>
 
     <div class="form-group">
-        <label for="reminderContent">Message</label>
-        <input type="text" id="reminderContent" placeholder="E.g., meeting with team">
+        <label>Message</label>
+        <input type="text" id="reminderContent" placeholder="Meeting, Call, etc." onkeyup="updatePreview()" autocomplete="off">
     </div>
-
-    <button class="btn-generate" onclick="generateCode()">Generate Command</button>
     
-    <textarea id="outputBox" readonly placeholder="!remind 2025-12-02 19:20 content"></textarea>
+    <div class="result-area">
+        <textarea id="outputBox" readonly></textarea>
+    </div>
     
-    <button class="btn-copy" id="copyBtn" onclick="copyText()">Copy Code</button>
+    <button class="btn-copy" id="copyBtn" onclick="copyAndSave()">Copy Command</button>
+</div>
+
+<div class="history-section" id="historySection" style="display:none;">
+    <div class="history-title">
+        <span>RECENTLY USED</span>
+        <span style="cursor:pointer; color:var(--primary);" onclick="clearHistory()">Clear</span>
+    </div>
+    <div class="history-list" id="historyList"></div>
 </div>
 
 <script>
-    function generateCode() {
-        // 1. Get values from inputs
-        const content = document.getElementById('reminderContent').value;
+    // 1. Initialize Defaults
+    const now = new Date();
+    // Default to nearest 5 mins
+    now.setMinutes(Math.ceil(now.getMinutes() / 5) * 5);
+    updateInputs(now);
+    renderHistory();
+
+    // Helper to set date inputs
+    function updateInputs(dateObj) {
+        const dateStr = dateObj.toISOString().split('T')[0];
+        const hours = String(dateObj.getHours()).padStart(2, '0');
+        const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+        
+        document.getElementById('reminderDate').value = dateStr;
+        document.getElementById('reminderTime').value = `${hours}:${minutes}`;
+        updatePreview();
+    }
+
+    // New Function: Set Specific Time
+    function setTime(hour, minute) {
+        const h = String(hour).padStart(2, '0');
+        const m = String(minute).padStart(2, '0');
+        document.getElementById('reminderTime').value = `${h}:${m}`;
+        
+        // Add visual feedback (flash the time input)
+        const timeInput = document.getElementById('reminderTime');
+        timeInput.style.backgroundColor = "var(--primary)";
+        timeInput.style.color = "white";
+        setTimeout(() => {
+            timeInput.style.backgroundColor = "";
+            timeInput.style.color = "";
+        }, 300);
+
+        updatePreview();
+    }
+
+    function updatePreview() {
+        const content = document.getElementById('reminderContent').value.trim();
         const date = document.getElementById('reminderDate').value;
         const time = document.getElementById('reminderTime').value;
+        const safeContent = content ? content : "[message]";
         
-        // 2. Simple validation
-        if(!content || !date || !time) {
-            alert("Please fill in Date, Time, and Message.");
-            return;
+        // Format: !remind YYYY-MM-DD HH:MM Content
+        document.getElementById('outputBox').value = `!remind ${date} ${time} ${safeContent}`;
+    }
+
+    function copyAndSave() {
+        const outputBox = document.getElementById("outputBox");
+        const content = document.getElementById('reminderContent').value.trim();
+        
+        if(content) {
+            saveToHistory(content);
         }
 
-        // 3. New Format: !remind [YYYY-MM-DD] [HH:mm] [Content]
-        const command = `!remind ${date} ${time} ${content}`;
-
-        // 4. Output the result
-        const outputBox = document.getElementById('outputBox');
-        outputBox.value = command;
-
-        // 5. Show the copy button
-        document.getElementById('copyBtn').style.display = "block";
-    }
-
-    function copyText() {
-        const copyText = document.getElementById("outputBox");
-        copyText.select();
-        copyText.setSelectionRange(0, 99999); // For mobile devices
-
-        navigator.clipboard.writeText(copyText.value).then(() => {
+        outputBox.select();
+        outputBox.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(outputBox.value).then(() => {
             const btn = document.getElementById("copyBtn");
             const originalText = btn.innerText;
-            btn.innerText = "Copied!";
+            btn.innerText = "✅ Copied!";
+            btn.style.backgroundColor = "#28a745";
             setTimeout(() => {
                 btn.innerText = originalText;
-            }, 2000);
+                btn.style.backgroundColor = "";
+            }, 1500);
         });
     }
-    
-    // Optional: Set default date to today
-    document.getElementById('reminderDate').valueAsDate = new Date();
+
+    function saveToHistory(msg) {
+        let history = JSON.parse(localStorage.getItem('remindHistory') || '[]');
+        history = history.filter(item => item !== msg);
+        history.unshift(msg);
+        if(history.length > 5) history.pop();
+        localStorage.setItem('remindHistory', JSON.stringify(history));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const history = JSON.parse(localStorage.getItem('remindHistory') || '[]');
+        const container = document.getElementById('historyList');
+        const section = document.getElementById('historySection');
+        
+        if (history.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+        
+        section.style.display = 'block';
+        container.innerHTML = '';
+        
+        history.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerText = msg;
+            div.onclick = () => {
+                document.getElementById('reminderContent').value = msg;
+                updatePreview();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            container.appendChild(div);
+        });
+    }
+
+    function clearHistory() {
+        localStorage.removeItem('remindHistory');
+        renderHistory();
+    }
 </script>
 
 </body>
